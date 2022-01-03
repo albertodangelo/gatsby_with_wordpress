@@ -6,46 +6,59 @@
  */
 
 import React from "react"
-import PropTypes from "prop-types"
-import { useStaticQuery, graphql } from "gatsby"
+import MainMenu from "./MainMenu"
+import styled, { createGlobalStyle } from "styled-components"
 
-import Header from "./header"
-import "./layout.css"
+import { graphql, StaticQuery } from "gatsby"
+import { Helmet } from "react-helmet"
 
-const Layout = ({ children }) => {
-  const data = useStaticQuery(graphql`
-    query SiteTitleQuery {
-      site {
-        siteMetadata {
-          title
+const LayoutWrapper = styled.div`
+  max-width: 960px;
+  margin: 0 auto;
+`
+
+const GlobalStyles = createGlobalStyle`
+
+  @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+
+  body {
+    font-family: 'Open Sans', sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+`
+
+const Layout = ({ children }) => (
+  <>
+    <StaticQuery
+      query={graphql`
+        {
+          allWordpressWpFavicon {
+            edges {
+              node {
+                url {
+                  source_url
+                }
+              }
+            }
+          }
         }
-      }
-    }
-  `)
+      `}
+      render={props => (
+        <Helmet>
+          <link
+            rel="icon"
+            href={props.allWordpressWpFavicon.edges[0].node.url.source_url}
+          />
+        </Helmet>
+      )}
+    />
 
-  return (
-    <>
-      <Header siteTitle={data.site.siteMetadata.title} />
-      <div
-        style={{
-          margin: `0 auto`,
-          maxWidth: 960,
-          padding: `0 1.0875rem 1.45rem`,
-        }}
-      >
-        <main>{children}</main>
-        <footer>
-          © {new Date().getFullYear()}, Built with
-          {` `}
-          <a href="https://www.gatsbyjs.org">Gatsby</a>
-        </footer>
-      </div>
-    </>
-  )
-}
-
-Layout.propTypes = {
-  children: PropTypes.node.isRequired,
-}
+    <GlobalStyles />
+    <MainMenu />
+    <LayoutWrapper>{children}</LayoutWrapper>
+  </>
+)
 
 export default Layout
